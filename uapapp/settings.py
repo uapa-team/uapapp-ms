@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,12 +32,16 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'uapapp_ms.apps.UapappMsConfig',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -73,10 +78,20 @@ WSGI_APPLICATION = 'uapapp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+DB_HOST = os.environ.get('UAPAPP_DB_HOST')
+DB_PORT = os.environ.get('UAPAPP_DB_PORT')
+DB_NAME = os.environ.get('UAPAPP_DB_NAME')
+DB_USER = os.environ.get('UAPAPP_DB_USER')
+DB_PASS = os.environ.get('UAPAPP_DB_PASS')
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST':     DB_HOST,
+        'PORT':     DB_PORT,
+        'NAME':     DB_NAME,
+        'USER':     DB_USER,
+        'PASSWORD': DB_PASS,
     }
 }
 
