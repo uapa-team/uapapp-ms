@@ -84,6 +84,12 @@ DB_NAME = os.environ.get('UAPAPP_DB_NAME')
 DB_USER = os.environ.get('UAPAPP_DB_USER')
 DB_PASS = os.environ.get('UAPAPP_DB_PASS')
 
+MAIN_DB_HOST = os.environ.get('MAIN_DB_HOST')
+MAIN_DB_PORT = os.environ.get('MAIN_DB_PORT')
+MAIN_DB_NAME = os.environ.get('MAIN_DB_NAME')
+MAIN_DB_USER = os.environ.get('MAIN_DB_USER')
+MAIN_DB_PASS = os.environ.get('MAIN_DB_PASS')
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -92,6 +98,14 @@ DATABASES = {
         'NAME':     DB_NAME,
         'USER':     DB_USER,
         'PASSWORD': DB_PASS,
+    },
+    'mainDB': {
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST':     MAIN_DB_HOST,
+        'PORT':     MAIN_DB_PORT,
+        'NAME':     MAIN_DB_NAME,
+        'USER':     MAIN_DB_USER,
+        'PASSWORD': MAIN_DB_PASS,
     }
 }
 
