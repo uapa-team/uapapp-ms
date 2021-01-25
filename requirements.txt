@@ -3,3 +3,5 @@ djangorestframework
 xlsxwriter
 requests
 django-cors-headers
+djangorestframework-simplejwt
+pyjwt

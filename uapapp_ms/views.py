@@ -3,17 +3,27 @@ import os
 import requests
 import json
 import xlsxwriter
+import jwt
 
 from django.http import JsonResponse
 from django.db import connections
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.status import *
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import Report, ReportSerializer, View
 
-def token_is_valid(token):
-    token = token.replace('Token ', '')
+def get_token(request):
+    jwt_obj = JWTAuthentication()
+    header = jwt_obj.get_header(request)
+    return jwt_obj.get_raw_token(header)
+
+def decode_token(token):
+    return jwt.decode(token, options={"verify_signature": False})
+
+def token_is_valid(request):
+    token = get_token(request)
     r = requests.post(f'{os.environ.get("USERS_URL")}verify/', {'token': token})
     return r.status_code == HTTP_200_OK
 
@@ -21,10 +31,35 @@ def token_is_valid(token):
 def check(request):
     return JsonResponse({"Ok?": "Ok!"}, status=HTTP_200_OK)
 
+def get_role(groups):
+    # 0: Sin rol asignado
+    # 1: Administrador
+    # 2: Auxiliar
+    # 3: Coordinador
+    # 4: UAPA
+    # 5: Dependencia
+    if 'UAPApp - Administradores' in groups:
+        return 1
+    if 'UAPApp - Auxiliares' in groups:
+        return 2
+    if 'UAPApp - Coordinadores' in groups:
+        return 3
+    if 'UAPApp - Miembros UAPA' in groups:
+        return 4
+    if 'UAPApp - Miembros Dependencia' in groups:
+        return 5
+    return 0
+
 @api_view(["POST"])
 def login(request):
     r = requests.post(os.environ.get('USERS_URL'), json.loads(request.body))
-    return JsonResponse(r.json(), status=r.status_code)
+    payload = r.json()
+    user_info = decode_token(payload['access'])
+    payload['username'] = user_info['username']
+    payload['full_name'] = user_info['full_name']
+    payload['role'] = get_role(user_info['groups'])
+
+    return JsonResponse(payload, status=r.status_code)
 
 @api_view(["POST"])
 def refresh(request):
@@ -33,7 +68,7 @@ def refresh(request):
 
 @api_view(["GET"])
 def reports(request):
-    if not token_is_valid(request.headers['Authorization']):
+    if not token_is_valid(request):
         return JsonResponse({'detail': 'Token is invalid or expired.'}, status=HTTP_401_UNAUTHORIZED)
     
     data = Report.objects.all()
@@ -59,7 +94,7 @@ def reports(request):
 
 @api_view(["POST"])
 def report(request, code):
-    if not token_is_valid(request.headers['Authorization']):
+    if not token_is_valid(request):
         return JsonResponse({'detail': 'Token is invalid or expired.'}, status=HTTP_401_UNAUTHORIZED)
     
     try:
