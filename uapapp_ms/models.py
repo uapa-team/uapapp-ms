@@ -32,6 +32,7 @@ class Report(models.Model):
         ordering = ['name']
     
     name = models.CharField(unique=True, max_length=50, verbose_name='Nombre del reporte')
+    description = models.TextField(verbose_name='Descripción', default='')
 
     def __str__(self):
         return self.name

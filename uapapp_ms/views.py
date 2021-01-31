@@ -79,7 +79,7 @@ def reports(request):
             views = View.objects.filter(reportviewrelation__report=report.id)
             for v in views:
                 if v.main_period == '':
-                    periods.add('Todos los periodos')
+                    periods.add((0, 'Todos los periodos'))
                 else:
                     cursor.execute('select distinct {}, {} from {};'.format(v.main_period, v.text_period, v.name))
                     for row in cursor:
@@ -87,6 +87,7 @@ def reports(request):
 
             reports[report.name] = {
                 'code': report.id,
+                'description': report.description,
                 'periods': sorted(list(periods), key=lambda x: x[0], reverse=True)
                 }
 
