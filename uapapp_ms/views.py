@@ -81,13 +81,13 @@ def reports(request):
                 if v.main_period == '':
                     periods.add('Todos los periodos')
                 else:
-                    cursor.execute('select distinct {} from {};'.format(v.main_period, v.name))
+                    cursor.execute('select distinct {}, {} from {};'.format(v.main_period, v.text_period, v.name))
                     for row in cursor:
-                        periods.add(row[0])
+                        periods.add((row[0], row[1]))
 
             reports[report.name] = {
                 'code': report.id,
-                'periods': sorted(list(periods), reverse=True)
+                'periods': sorted(list(periods), key=lambda x: x[0], reverse=True)
                 }
 
     return JsonResponse(reports, safe=False, status=HTTP_200_OK)

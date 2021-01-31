@@ -16,7 +16,7 @@ class ViewAdmin(admin.ModelAdmin):
             'fields': ('name', 'sheet_name')
         }),
         ('Filtros', {
-            'fields': ('main_period', 'main_program'),
+            'fields': ('main_period', 'text_period', 'main_program', 'text_program'),
             'description': 'Nombre de las columnas para filtrar (dejar en blanco para ignorar).'
         })
     )

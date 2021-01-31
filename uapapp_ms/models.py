@@ -10,12 +10,19 @@ class View(models.Model):
     sheet_name = models.CharField(max_length=50, verbose_name='Nombre de la hoja',
         help_text='Nombre de la hoja creada')
 
-    main_period = models.CharField(max_length=50, verbose_name='Columna de periodo',
+    main_period = models.CharField(max_length=50, verbose_name='Columna de código periodo',
         default = None, blank=True,
-        help_text='Columna de periodo en la vista para filtrar')
-    main_program = models.CharField(max_length=50, verbose_name='Columna de programa',
+        help_text='Columna con los códigos de periodo en la vista para filtrar')
+    text_period = models.CharField(max_length=50, verbose_name='Columna de nombre periodo',
         default = None, blank=True,
-        help_text='Columna de programa en la vista para filtrar')
+        help_text='Columna con los nombres de periodo para mostrar')
+
+    main_program = models.CharField(max_length=50, verbose_name='Columna de código programa',
+        default = None, blank=True,
+        help_text='Columna con los códigos de programa en la vista para filtrar')
+    text_program = models.CharField(max_length=50, verbose_name='Columna de nombre programa',
+        default = None, blank=True,
+        help_text='Columna con los nombres de programa para mostrar')
     
     def __str__(self):
         return self.name
