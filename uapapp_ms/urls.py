@@ -9,6 +9,8 @@ urlpatterns = [
     path('login', views.login, name='login'),
     path('refresh', views.refresh, name='refresh'),
 
+    path('programs', views.programs, name='programs'),
+
     path('reports', views.reports, name='reports'),
     path('report/<int:code>', views.report, name='reports'),
 

@@ -3,6 +3,19 @@ from django.db import connections
 
 from .models import View
 
+def get_role(groups):
+    if 'UAPApp - Administradores' in groups:
+        return 'Administrador' # 1
+    if 'UAPApp - Auxiliares' in groups:
+        return 'Auxiliar' # 2
+    if 'UAPApp - Coordinadores' in groups:
+        return 'Coordinador' # 3
+    if 'UAPApp - Miembros UAPA' in groups:
+        return 'UAPA' # 4
+    if 'UAPApp - Miembros Dependencia' in groups:
+        return 'Dependencia' # 5
+    return 'Sin rol asignado' # 0
+
 def get_report_periods(data):
     reports = {}
     with connections['mainDB'].cursor() as cursor:

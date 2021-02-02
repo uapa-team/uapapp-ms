@@ -13,7 +13,7 @@ from rest_framework.status import *
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import Report, View, ReportTypes, Format
-from .helpers import get_report_periods
+from .helpers import get_report_periods, get_role
 
 def get_token(request):
     jwt_obj = JWTAuthentication()
@@ -31,19 +31,6 @@ def token_is_valid(request):
 @api_view(["GET"])
 def check(request):
     return JsonResponse({"Ok?": "Ok!"}, status=HTTP_200_OK)
-
-def get_role(groups):
-    if 'UAPApp - Administradores' in groups:
-        return 'Administrador' # 1
-    if 'UAPApp - Auxiliares' in groups:
-        return 'Auxiliar' # 2
-    if 'UAPApp - Coordinadores' in groups:
-        return 'Coordinador' # 3
-    if 'UAPApp - Miembros UAPA' in groups:
-        return 'UAPA' # 4
-    if 'UAPApp - Miembros Dependencia' in groups:
-        return 'Dependencia' # 5
-    return 'Sin rol asignado' # 0
 
 @api_view(["POST"])
 def login(request):
@@ -125,3 +112,20 @@ def subformats(request, fr):
     data = Report.objects.filter(category=ReportTypes.FORMATO_DE_RECOLECCION, _format=fr)
 
     return JsonResponse(get_report_periods(data), safe=False, status=HTTP_200_OK)
+
+@api_view(["GET"])
+def programs(request):
+    if not token_is_valid(request):
+        return JsonResponse({'detail': 'Token is invalid or expired.'}, status=HTTP_401_UNAUTHORIZED)
+
+    if request.GET.get('level', 'PRE') == 'PRE':
+        modifier = 'where fk_niv = 1'
+    else:
+        modifier = 'where fk_niv != 1'
+
+    programs = []
+    with connections['mainDB'].cursor() as cursor:
+        cursor.execute(f'select * from programs_info {modifier};')
+        for p in cursor:
+            programs.append(p[:2])
+    return JsonResponse({'Programs': programs}, status=HTTP_200_OK)
