@@ -12,7 +12,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.status import *
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Report, ReportSerializer, View, ReportTypes
+from .models import Report, View, ReportTypes, Format
+from .helpers import get_report_periods
 
 def get_token(request):
     jwt_obj = JWTAuthentication()
@@ -32,23 +33,17 @@ def check(request):
     return JsonResponse({"Ok?": "Ok!"}, status=HTTP_200_OK)
 
 def get_role(groups):
-    # 0: Sin rol asignado
-    # 1: Administrador
-    # 2: Auxiliar
-    # 3: Coordinador
-    # 4: UAPA
-    # 5: Dependencia
     if 'UAPApp - Administradores' in groups:
-        return 'Administrador'
+        return 'Administrador' # 1
     if 'UAPApp - Auxiliares' in groups:
-        return 'Auxiliar'
+        return 'Auxiliar' # 2
     if 'UAPApp - Coordinadores' in groups:
-        return 'Coordinador'
+        return 'Coordinador' # 3
     if 'UAPApp - Miembros UAPA' in groups:
-        return 'UAPA'
+        return 'UAPA' # 4
     if 'UAPApp - Miembros Dependencia' in groups:
-        return 'Dependencia'
-    return 'Sin rol asignado'
+        return 'Dependencia' # 5
+    return 'Sin rol asignado' # 0
 
 @api_view(["POST"])
 def login(request):
@@ -72,26 +67,8 @@ def reports(request):
         return JsonResponse({'detail': 'Token is invalid or expired.'}, status=HTTP_401_UNAUTHORIZED)
     
     data = Report.objects.filter(category=ReportTypes.REPORTE)
-    reports = {}
-    with connections['mainDB'].cursor() as cursor:
-        for report in data:
-            periods = set()
-            views = View.objects.filter(reportviewrelation__report=report.id)
-            for v in views:
-                if v.main_period == '':
-                    periods.add((0, 'Todos los periodos'))
-                else:
-                    cursor.execute('select distinct {}, {} from {};'.format(v.main_period, v.text_period, v.name))
-                    for row in cursor:
-                        periods.add((row[0], row[1]))
 
-            reports[report.name] = {
-                'code': report.id,
-                'description': report.description,
-                'periods': sorted(list(periods), key=lambda x: x[0], reverse=True)
-                }
-
-    return JsonResponse(reports, safe=False, status=HTTP_200_OK)
+    return JsonResponse(get_report_periods(data), safe=False, status=HTTP_200_OK)
 
 @api_view(["POST"])
 def report(request, code):
@@ -130,3 +107,21 @@ def report(request, code):
                 counter += 1
 
     return JsonResponse({"url": file_name}, status=HTTP_200_OK)
+
+@api_view(["GET"])
+def formats(request):
+    if not token_is_valid(request):
+        return JsonResponse({'detail': 'Token is invalid or expired.'}, status=HTTP_401_UNAUTHORIZED)
+    
+    formats = [f[1] for f in Format.choices]
+
+    return JsonResponse({'Formatos': formats}, status=HTTP_200_OK)
+
+@api_view(["GET"])
+def subformats(request, fr):
+    if not token_is_valid(request):
+        return JsonResponse({'detail': 'Token is invalid or expired.'}, status=HTTP_401_UNAUTHORIZED)
+    
+    data = Report.objects.filter(category=ReportTypes.FORMATO_DE_RECOLECCION, _format=fr)
+
+    return JsonResponse(get_report_periods(data), safe=False, status=HTTP_200_OK)

@@ -1,6 +1,7 @@
 from django.db import models
 from rest_framework import serializers
 
+### Modelo de Vista que recolecta la información de las vistas creadas en la base de datos
 class View(models.Model):
     class Meta:
         ordering = ['name']
@@ -36,6 +37,17 @@ class ReportLevels(models.TextChoices):
     POSGRADO = 'POS'
     NO_APLICA = 'NA'
 
+class Format(models.TextChoices):
+    ADMITIDOS = 'Admitidos'
+    DOCENTES = 'Docentes'
+    EGRESADOS = 'Egresados'
+    ESTUDIANTES = 'Estudiantes'
+    GENERALES = 'Generales'
+    INVESTIGACION = 'Investigacion'
+    PROGRAMA = 'Programa'
+    NO_APLICA = 'NA'
+
+### Modelo de Reporte el cual abstrae la información de los reportes y Formatos de Recoleccion
 class Report(models.Model):
     class Meta:
         ordering = ['category', 'name']
@@ -48,17 +60,14 @@ class Report(models.Model):
     level = models.TextField(verbose_name='Nivel',
         choices=ReportLevels.choices, default=ReportLevels.NO_APLICA,
         help_text='Nivel de la información')
-    _format = models.CharField(verbose_name='Formato', max_length=50, default='',
+    _format = models.TextField(verbose_name='Formato', 
+        choices=Format.choices, default=Format.NO_APLICA,
         help_text='Solo aplica en el caso de los formatos de recolección')
 
     def __str__(self):
         return self.name
 
-class ReportSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Report
-        fields = ['name']
-
+### Modelo que relaciona vistas y reportes
 class ReportViewRelation(models.Model):
     report = models.ForeignKey(Report, on_delete=models.CASCADE)
     view = models.ForeignKey(View, on_delete=models.CASCADE)
