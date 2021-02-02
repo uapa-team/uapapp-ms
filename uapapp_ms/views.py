@@ -67,6 +67,12 @@ def report(request, code):
     except Report.DoesNotExist:
         return JsonResponse({'detail': 'The requested report does not exist.'}, status=HTTP_404_NOT_FOUND)
 
+    filters = json.loads(request.body)
+
+    if not ('periods' in filters and 'programs' in filters) or len(filters.keys()) != 2:
+        return JsonResponse({'detail': "The body keys must be 'periods' and 'programs' only"}, 
+            status=HTTP_400_BAD_REQUEST)
+
     file_name = f'public/{report.name}.xlsx'
     with connections['mainDB'].cursor() as cursor, xlsxwriter.Workbook(file_name) as book:
         title_format = book.add_format()
@@ -87,8 +93,19 @@ def report(request, code):
             for i in range(len(columns)):
                 sheet.set_column(i, i, len(columns[i]) + 5)
             
+            query = 'select * from {} '.format(v.name)
+            and_f = False
+            if v.main_period != '':
+                query += 'where {} in ({})'.format(
+                    v.main_period, ','.join([str(p) for p in filters['periods']]))
+                and_f = True
+            if v.main_program != '':
+                query += ' and ' if and_f else ' where '
+                query += '{} in ({})'.format(
+                    v.main_program, ','.join([str(p) for p in filters['programs']]))
+
             counter = 1
-            cursor.execute('select * from {};'.format(v.name))
+            cursor.execute(query)
             for row in cursor:
                 sheet.write_row(counter, 0, row)
                 counter += 1
