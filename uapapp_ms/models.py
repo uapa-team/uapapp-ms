@@ -27,12 +27,29 @@ class View(models.Model):
     def __str__(self):
         return self.name
 
+class ReportTypes(models.TextChoices):
+    REPORTE = 'RE'
+    FORMATO_DE_RECOLECCION = 'FR'
+
+class ReportLevels(models.TextChoices):
+    PREGRADO = 'PRE'
+    POSGRADO = 'POS'
+    NO_APLICA = 'NA'
+
 class Report(models.Model):
     class Meta:
-        ordering = ['name']
-    
+        ordering = ['category', 'name']
+
     name = models.CharField(unique=True, max_length=50, verbose_name='Nombre del reporte')
     description = models.TextField(verbose_name='Descripción', default='')
+
+    category = models.TextField(verbose_name='Categoria',
+        choices=ReportTypes.choices, default=ReportTypes.REPORTE)
+    level = models.TextField(verbose_name='Nivel',
+        choices=ReportLevels.choices, default=ReportLevels.NO_APLICA,
+        help_text='Nivel de la información')
+    _format = models.CharField(verbose_name='Formato', max_length=50, default='',
+        help_text='Solo aplica en el caso de los formatos de recolección')
 
     def __str__(self):
         return self.name

@@ -12,7 +12,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.status import *
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Report, ReportSerializer, View
+from .models import Report, ReportSerializer, View, ReportTypes
 
 def get_token(request):
     jwt_obj = JWTAuthentication()
@@ -71,7 +71,7 @@ def reports(request):
     if not token_is_valid(request):
         return JsonResponse({'detail': 'Token is invalid or expired.'}, status=HTTP_401_UNAUTHORIZED)
     
-    data = Report.objects.all()
+    data = Report.objects.filter(category=ReportTypes.REPORTE)
     reports = {}
     with connections['mainDB'].cursor() as cursor:
         for report in data:
