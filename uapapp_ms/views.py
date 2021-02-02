@@ -39,16 +39,16 @@ def get_role(groups):
     # 4: UAPA
     # 5: Dependencia
     if 'UAPApp - Administradores' in groups:
-        return 1
+        return 'Administrador'
     if 'UAPApp - Auxiliares' in groups:
-        return 2
+        return 'Auxiliar'
     if 'UAPApp - Coordinadores' in groups:
-        return 3
+        return 'Coordinador'
     if 'UAPApp - Miembros UAPA' in groups:
-        return 4
+        return 'UAPA'
     if 'UAPApp - Miembros Dependencia' in groups:
-        return 5
-    return 0
+        return 'Dependencia'
+    return 'Sin rol asignado'
 
 @api_view(["POST"])
 def login(request):
