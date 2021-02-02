@@ -26,7 +26,8 @@ SECRET_KEY = '+(ha#nd6^&@n^4d3)k9my0!zb32tmwcr$3!&ctznw-4b)b6%br'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+HOST = os.environ.get('UAPAPP_HOST')
+ALLOWED_HOSTS = [ HOST ]
 
 CORS_ORIGIN_WHITELIST = [
     "https://www.ingenieria.bogota.unal.edu.co",
