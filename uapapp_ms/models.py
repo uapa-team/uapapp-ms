@@ -47,6 +47,15 @@ class Format(models.TextChoices):
     PROGRAMA = 'Programa'
     NO_APLICA = 'NA'
 
+class Period(models.Model):
+    class Meta:
+        ordering = ['-code']
+    code = models.IntegerField(primary_key=True, verbose_name='Codigo')
+    text = models.CharField(max_length=10, verbose_name='Texto')
+
+    def __str__(self):
+        return self.text
+
 ### Modelo de Reporte el cual abstrae la información de los reportes y Formatos de Recoleccion
 class Report(models.Model):
     class Meta:
@@ -63,6 +72,7 @@ class Report(models.Model):
     _format = models.TextField(verbose_name='Formato', 
         choices=Format.choices, default=Format.NO_APLICA,
         help_text='Solo aplica en el caso de los formatos de recolección')
+    periods = models.ManyToManyField(Period, blank=True, verbose_name='Periodos')
 
     def __str__(self):
         return self.name

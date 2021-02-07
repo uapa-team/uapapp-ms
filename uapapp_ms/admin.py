@@ -1,13 +1,16 @@
 from django.contrib import admin
-from .models import Report, View, ReportViewRelation
+from .models import Report, View, ReportViewRelation, Period
 
 class ReportViewInLine(admin.StackedInline):
     model = ReportViewRelation
     extra = 1
 
+admin.site.register(Period)
+
 @admin.register(Report)
 class ReportAdmin(admin.ModelAdmin):
-    inlines = [ReportViewInLine]
+    inlines = [ReportViewInLine,]
+    filter_horizontal = ('periods',)
 
 @admin.register(View)
 class ViewAdmin(admin.ModelAdmin):
