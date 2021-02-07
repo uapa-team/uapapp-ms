@@ -116,8 +116,9 @@ def report(request, code):
 def formats(request):
     if not token_is_valid(request):
         return JsonResponse({'detail': 'Token is invalid or expired.'}, status=HTTP_401_UNAUTHORIZED)
-    
-    formats = [f[1] for f in Format.choices]
+
+    level = request.GET.get('level', 'PRE')
+    formats = [r._format for r in Report.objects.filter(level=level)]
 
     return JsonResponse({'Formatos': formats}, status=HTTP_200_OK)
 
